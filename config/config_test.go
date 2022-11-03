@@ -10,15 +10,26 @@ import (
 
 var _ = Describe("Config", func() {
 
-	It("sets host and port", func() {
-		configJson := []byte(`{"host": "foo-host", "port": "1234"}`)
+	It("contains account-name and account-name", func() {
+		configJson := []byte(`{"account-name": "foo-account-name", "account-key": "bar-account-key"}`)
 		configReader := bytes.NewReader(configJson)
 
 		config, err := config.NewFromReader(configReader)
 
 		Expect(err).ToNot(HaveOccurred())
-		Expect(config.Host).To(Equal("foo-host"))
-		Expect(config.Port).To(Equal("1234"))
+		Expect(config.AccountName).To(Equal("foo-account-name"))
+		Expect(config.AccountKey).To(Equal("bar-account-key"))
+	})
+
+	It("is empty if config cannot be parsed", func() {
+		configJson := []byte(`~`)
+		configReader := bytes.NewReader(configJson)
+
+		config, err := config.NewFromReader(configReader)
+
+		Expect(err.Error()).To(Equal("invalid character '~' looking for beginning of value"))
+		Expect(config.AccountName).Should(BeEmpty())
+		Expect(config.AccountKey).Should(BeEmpty())
 	})
 
 	Context("when the configuration file cannot be read", func() {

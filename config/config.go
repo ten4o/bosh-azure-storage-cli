@@ -6,8 +6,8 @@ import (
 )
 
 type AZStorageConfig struct {
-	Host string `json:"host"`
-	Port string `json:"port"`
+	AccountName string `json:"account-name"`
+	AccountKey  string `json:"account-key"`
 }
 
 // NewFromReader returns a new azure-storage-cli configuration struct from the contents of reader.
