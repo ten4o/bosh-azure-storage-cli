@@ -11,7 +11,9 @@ import (
 var _ = Describe("Config", func() {
 
 	It("contains account-name and account-name", func() {
-		configJson := []byte(`{"account-name": "foo-account-name", "account-key": "bar-account-key"}`)
+		configJson := []byte(`{"account-name": "foo-account-name", 
+								"account-key": "bar-account-key", 
+								"container-name": "baz-container-name"}`)
 		configReader := bytes.NewReader(configJson)
 
 		config, err := config.NewFromReader(configReader)
@@ -19,6 +21,7 @@ var _ = Describe("Config", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(config.AccountName).To(Equal("foo-account-name"))
 		Expect(config.AccountKey).To(Equal("bar-account-key"))
+		Expect(config.ContainerName).To(Equal("baz-container-name"))
 	})
 
 	It("is empty if config cannot be parsed", func() {
