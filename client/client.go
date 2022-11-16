@@ -25,3 +25,10 @@ func (client *AzBlobstore) Get(source string, dest *os.File) error {
 
 	return err
 }
+
+func (client *AzBlobstore) Delete(dest string) error {
+
+	_, err := client.storageClient.Delete(dest)
+
+	return err
+}

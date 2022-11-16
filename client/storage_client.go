@@ -17,12 +17,16 @@ type StorageClient interface {
 	Upload(
 		source io.ReadSeekCloser,
 		dest string,
-	) (StorageResponse, error)
+	) (StorageUploadResponse, error)
 
 	Download(
 		source string,
 		dest *os.File,
 	) (int64, error)
+
+	Delete(
+		dest string,
+	) (StorageDeleteResponse, error)
 }
 
 type DefaultStorageClient struct {
@@ -43,19 +47,20 @@ func NewStorageClient(storageConfig config.AZStorageConfig) (StorageClient, erro
 
 func (dsc DefaultStorageClient) Upload(
 	source io.ReadSeekCloser,
-	dest string) (StorageResponse, error) {
+	dest string,
+) (StorageUploadResponse, error) {
 
 	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, dest)
 
 	log.Println(fmt.Sprintf("Uploading %s", blobURL))
 	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
 	if err != nil {
-		return StorageResponse{}, err
+		return StorageUploadResponse{}, err
 	}
 
 	resp, err := client.Upload(context.Background(), source, nil)
 
-	return StorageResponse{
+	return StorageUploadResponse{
 		ClientRequestID:     resp.ClientRequestID,
 		ContentMD5:          resp.ContentMD5,
 		Date:                resp.Date,
@@ -72,7 +77,8 @@ func (dsc DefaultStorageClient) Upload(
 
 func (dsc DefaultStorageClient) Download(
 	source string,
-	dest *os.File) (int64, error) {
+	dest *os.File,
+) (int64, error) {
 
 	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, source)
 
@@ -85,4 +91,26 @@ func (dsc DefaultStorageClient) Download(
 	resp, err := client.DownloadFile(context.Background(), dest, nil)
 
 	return resp, err
+}
+
+func (dsc DefaultStorageClient) Delete(
+	dest string,
+) (StorageDeleteResponse, error) {
+
+	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, dest)
+
+	log.Println(fmt.Sprintf("Deleting %s", blobURL))
+	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
+	if err != nil {
+		return StorageDeleteResponse{}, err
+	}
+
+	resp, err := client.Delete(context.Background(), nil)
+
+	return StorageDeleteResponse{
+		ClientRequestID: resp.ClientRequestID,
+		Date:            resp.Date,
+		RequestID:       resp.RequestID,
+		Version:         resp.Version,
+	}, err
 }

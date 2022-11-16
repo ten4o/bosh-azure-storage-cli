@@ -44,4 +44,18 @@ var _ = Describe("Client", func() {
 		Expect(dest).To(Equal(file))
 	})
 
+	It("delete blob deletes the blob", func() {
+		storageClient := clientfakes.FakeStorageClient{}
+
+		azBlobstore, err := client.New(&storageClient)
+		Expect(err).ToNot(HaveOccurred())
+
+		azBlobstore.Delete("blob")
+
+		Expect(storageClient.DeleteCallCount()).To(Equal(1))
+		dest := storageClient.DeleteArgsForCall(0)
+
+		Expect(dest).To(Equal("blob"))
+	})
+
 })

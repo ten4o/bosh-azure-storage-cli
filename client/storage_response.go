@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type StorageResponse struct {
+type StorageUploadResponse struct {
 	// ClientRequestID contains the information returned from the x-ms-client-request-id header response.
 	ClientRequestID *string
 
@@ -38,4 +38,18 @@ type StorageResponse struct {
 
 	// VersionID contains the information returned from the x-ms-version-id header response.
 	VersionID *string
+}
+
+type StorageDeleteResponse struct {
+	// ClientRequestID contains the information returned from the x-ms-client-request-id header response.
+	ClientRequestID *string
+
+	// Date contains the information returned from the Date header response.
+	Date *time.Time
+
+	// RequestID contains the information returned from the x-ms-request-id header response.
+	RequestID *string
+
+	// Version contains the information returned from the x-ms-version header response.
+	Version *string
 }
