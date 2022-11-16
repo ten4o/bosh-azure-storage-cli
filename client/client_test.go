@@ -8,9 +8,9 @@ import (
 	"os"
 )
 
-var _ = Describe("Config", func() {
+var _ = Describe("Client", func() {
 
-	It("put", func() {
+	It("put file uploads to a blob", func() {
 		storageClient := clientfakes.FakeStorageClient{}
 
 		azBlobstore, err := client.New(&storageClient)
@@ -18,13 +18,30 @@ var _ = Describe("Config", func() {
 
 		file, _ := os.CreateTemp("", "tmpfile")
 
-		azBlobstore.Put(file, "target/file.txt")
+		azBlobstore.Put(file, "target/blob")
 
 		Expect(storageClient.UploadCallCount()).To(Equal(1))
-		sourceFile, destPath := storageClient.UploadArgsForCall(0)
+		source, dest := storageClient.UploadArgsForCall(0)
 
-		Expect(sourceFile).To(Equal(file))
-		Expect(destPath).To(Equal("target/file.txt"))
+		Expect(source).To(Equal(file))
+		Expect(dest).To(Equal("target/blob"))
+	})
+
+	It("get blob downloads to a file", func() {
+		storageClient := clientfakes.FakeStorageClient{}
+
+		azBlobstore, err := client.New(&storageClient)
+		Expect(err).ToNot(HaveOccurred())
+
+		file, _ := os.CreateTemp("", "tmpfile")
+
+		azBlobstore.Get("source/blob", file)
+
+		Expect(storageClient.DownloadCallCount()).To(Equal(1))
+		source, dest := storageClient.DownloadArgsForCall(0)
+
+		Expect(source).To(Equal("source/blob"))
+		Expect(dest).To(Equal(file))
 	})
 
 })

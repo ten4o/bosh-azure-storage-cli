@@ -3,19 +3,26 @@ package client
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"os"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blockblob"
 	"github.com/mvach/bosh-azure-storage-cli/config"
-	"io"
-	"log"
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . StorageClient
 type StorageClient interface {
 	Upload(
-		sourceFile io.ReadSeekCloser,
-		destPath string,
+		source io.ReadSeekCloser,
+		dest string,
 	) (StorageResponse, error)
+
+	Download(
+		source string,
+		dest *os.File,
+	) (int64, error)
 }
 
 type DefaultStorageClient struct {
@@ -35,10 +42,10 @@ func NewStorageClient(storageConfig config.AZStorageConfig) (StorageClient, erro
 }
 
 func (dsc DefaultStorageClient) Upload(
-	sourceFile io.ReadSeekCloser,
-	destPath string) (StorageResponse, error) {
+	source io.ReadSeekCloser,
+	dest string) (StorageResponse, error) {
 
-	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, destPath)
+	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, dest)
 
 	log.Println(fmt.Sprintf("Uploading %s", blobURL))
 	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
@@ -46,7 +53,7 @@ func (dsc DefaultStorageClient) Upload(
 		return StorageResponse{}, err
 	}
 
-	resp, err := client.Upload(context.Background(), sourceFile, nil)
+	resp, err := client.Upload(context.Background(), source, nil)
 
 	return StorageResponse{
 		ClientRequestID:     resp.ClientRequestID,
@@ -61,4 +68,21 @@ func (dsc DefaultStorageClient) Upload(
 		Version:             resp.Version,
 		VersionID:           resp.VersionID,
 	}, err
+}
+
+func (dsc DefaultStorageClient) Download(
+	source string,
+	dest *os.File) (int64, error) {
+
+	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, source)
+
+	log.Println(fmt.Sprintf("Downloading %s", blobURL))
+	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
+	if err != nil {
+		return -1, err
+	}
+
+	resp, err := client.DownloadFile(context.Background(), dest, nil)
+
+	return resp, err
 }

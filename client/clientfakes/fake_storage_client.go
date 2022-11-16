@@ -3,12 +3,27 @@ package clientfakes
 
 import (
 	"io"
+	"os"
 	"sync"
 
 	"github.com/mvach/bosh-azure-storage-cli/client"
 )
 
 type FakeStorageClient struct {
+	DownloadStub        func(string, *os.File) (int64, error)
+	downloadMutex       sync.RWMutex
+	downloadArgsForCall []struct {
+		arg1 string
+		arg2 *os.File
+	}
+	downloadReturns struct {
+		result1 int64
+		result2 error
+	}
+	downloadReturnsOnCall map[int]struct {
+		result1 int64
+		result2 error
+	}
 	UploadStub        func(io.ReadSeekCloser, string) (client.StorageResponse, error)
 	uploadMutex       sync.RWMutex
 	uploadArgsForCall []struct {
@@ -25,6 +40,71 @@ type FakeStorageClient struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeStorageClient) Download(arg1 string, arg2 *os.File) (int64, error) {
+	fake.downloadMutex.Lock()
+	ret, specificReturn := fake.downloadReturnsOnCall[len(fake.downloadArgsForCall)]
+	fake.downloadArgsForCall = append(fake.downloadArgsForCall, struct {
+		arg1 string
+		arg2 *os.File
+	}{arg1, arg2})
+	stub := fake.DownloadStub
+	fakeReturns := fake.downloadReturns
+	fake.recordInvocation("Download", []interface{}{arg1, arg2})
+	fake.downloadMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeStorageClient) DownloadCallCount() int {
+	fake.downloadMutex.RLock()
+	defer fake.downloadMutex.RUnlock()
+	return len(fake.downloadArgsForCall)
+}
+
+func (fake *FakeStorageClient) DownloadCalls(stub func(string, *os.File) (int64, error)) {
+	fake.downloadMutex.Lock()
+	defer fake.downloadMutex.Unlock()
+	fake.DownloadStub = stub
+}
+
+func (fake *FakeStorageClient) DownloadArgsForCall(i int) (string, *os.File) {
+	fake.downloadMutex.RLock()
+	defer fake.downloadMutex.RUnlock()
+	argsForCall := fake.downloadArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeStorageClient) DownloadReturns(result1 int64, result2 error) {
+	fake.downloadMutex.Lock()
+	defer fake.downloadMutex.Unlock()
+	fake.DownloadStub = nil
+	fake.downloadReturns = struct {
+		result1 int64
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeStorageClient) DownloadReturnsOnCall(i int, result1 int64, result2 error) {
+	fake.downloadMutex.Lock()
+	defer fake.downloadMutex.Unlock()
+	fake.DownloadStub = nil
+	if fake.downloadReturnsOnCall == nil {
+		fake.downloadReturnsOnCall = make(map[int]struct {
+			result1 int64
+			result2 error
+		})
+	}
+	fake.downloadReturnsOnCall[i] = struct {
+		result1 int64
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeStorageClient) Upload(arg1 io.ReadSeekCloser, arg2 string) (client.StorageResponse, error) {
@@ -95,6 +175,8 @@ func (fake *FakeStorageClient) UploadReturnsOnCall(i int, result1 client.Storage
 func (fake *FakeStorageClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.downloadMutex.RLock()
+	defer fake.downloadMutex.RUnlock()
 	fake.uploadMutex.RLock()
 	defer fake.uploadMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

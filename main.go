@@ -29,7 +29,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	azBlobstore, err := client.New(storageClient)
+	blobstoreClient, err := client.New(storageClient)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -56,7 +56,22 @@ func main() {
 
 		defer sourceFile.Close()
 
-		err = azBlobstore.Put(sourceFile, dst)
+		err = blobstoreClient.Put(sourceFile, dst)
+
+	case "get":
+		if len(nonFlagArgs) != 3 {
+			log.Fatalf("Get method expected 3 arguments got %d\n", len(nonFlagArgs))
+		}
+		src, dst := nonFlagArgs[1], nonFlagArgs[2]
+
+		var dstFile *os.File
+		dstFile, err = os.Create(dst)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		defer dstFile.Close()
+		err = blobstoreClient.Get(src, dstFile)
 
 	default:
 		log.Fatalf("unknown command: '%s'\n", cmd)
