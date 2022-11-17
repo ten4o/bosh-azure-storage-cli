@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/mvach/bosh-azure-storage-cli/blob"
 	"github.com/mvach/bosh-azure-storage-cli/client"
 )
 
@@ -35,6 +36,19 @@ type FakeStorageClient struct {
 	}
 	downloadReturnsOnCall map[int]struct {
 		result1 int64
+		result2 error
+	}
+	ExistsStub        func(string) (blob.ExistenceState, error)
+	existsMutex       sync.RWMutex
+	existsArgsForCall []struct {
+		arg1 string
+	}
+	existsReturns struct {
+		result1 blob.ExistenceState
+		result2 error
+	}
+	existsReturnsOnCall map[int]struct {
+		result1 blob.ExistenceState
 		result2 error
 	}
 	UploadStub        func(io.ReadSeekCloser, string) (client.StorageUploadResponse, error)
@@ -184,6 +198,70 @@ func (fake *FakeStorageClient) DownloadReturnsOnCall(i int, result1 int64, resul
 	}{result1, result2}
 }
 
+func (fake *FakeStorageClient) Exists(arg1 string) (blob.ExistenceState, error) {
+	fake.existsMutex.Lock()
+	ret, specificReturn := fake.existsReturnsOnCall[len(fake.existsArgsForCall)]
+	fake.existsArgsForCall = append(fake.existsArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.ExistsStub
+	fakeReturns := fake.existsReturns
+	fake.recordInvocation("Existing", []interface{}{arg1})
+	fake.existsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeStorageClient) ExistsCallCount() int {
+	fake.existsMutex.RLock()
+	defer fake.existsMutex.RUnlock()
+	return len(fake.existsArgsForCall)
+}
+
+func (fake *FakeStorageClient) ExistsCalls(stub func(string) (blob.ExistenceState, error)) {
+	fake.existsMutex.Lock()
+	defer fake.existsMutex.Unlock()
+	fake.ExistsStub = stub
+}
+
+func (fake *FakeStorageClient) ExistsArgsForCall(i int) string {
+	fake.existsMutex.RLock()
+	defer fake.existsMutex.RUnlock()
+	argsForCall := fake.existsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeStorageClient) ExistsReturns(result1 blob.ExistenceState, result2 error) {
+	fake.existsMutex.Lock()
+	defer fake.existsMutex.Unlock()
+	fake.ExistsStub = nil
+	fake.existsReturns = struct {
+		result1 blob.ExistenceState
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeStorageClient) ExistsReturnsOnCall(i int, result1 blob.ExistenceState, result2 error) {
+	fake.existsMutex.Lock()
+	defer fake.existsMutex.Unlock()
+	fake.ExistsStub = nil
+	if fake.existsReturnsOnCall == nil {
+		fake.existsReturnsOnCall = make(map[int]struct {
+			result1 blob.ExistenceState
+			result2 error
+		})
+	}
+	fake.existsReturnsOnCall[i] = struct {
+		result1 blob.ExistenceState
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeStorageClient) Upload(arg1 io.ReadSeekCloser, arg2 string) (client.StorageUploadResponse, error) {
 	fake.uploadMutex.Lock()
 	ret, specificReturn := fake.uploadReturnsOnCall[len(fake.uploadArgsForCall)]
@@ -256,6 +334,8 @@ func (fake *FakeStorageClient) Invocations() map[string][][]interface{} {
 	defer fake.deleteMutex.RUnlock()
 	fake.downloadMutex.RLock()
 	defer fake.downloadMutex.RUnlock()
+	fake.existsMutex.RLock()
+	defer fake.existsMutex.RUnlock()
 	fake.uploadMutex.RLock()
 	defer fake.uploadMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
