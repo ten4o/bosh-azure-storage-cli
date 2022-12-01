@@ -1,8 +1,11 @@
 package client
 
 import (
+	"fmt"
 	"github.com/mvach/bosh-azure-storage-cli/blob"
 	"os"
+	"strings"
+	"time"
 )
 
 type AzBlobstore struct {
@@ -36,7 +39,15 @@ func (client *AzBlobstore) Delete(dest string) error {
 
 func (client *AzBlobstore) Exists(dest string) (blob.ExistenceState, error) {
 
-	result, err := client.storageClient.Exists(dest)
+	return client.storageClient.Exists(dest)
+}
 
-	return result, err
+func (client *AzBlobstore) Sign(dest string, action string, expiration time.Duration) (string, error) {
+	action = strings.ToUpper(action)
+	switch action {
+	case "GET":
+		return client.storageClient.SignedUrl(dest, expiration)
+	default:
+		return "", fmt.Errorf("action not implemented: %s", action)
+	}
 }

@@ -87,9 +87,9 @@ var _ = Describe("Client", func() {
 			Expect(dest).To(Equal("blob"))
 		})
 
-		It("returns blob.ExistenceUnknown and an error in case an error occured", func() {
+		It("returns blob.ExistenceUnknown and an error in case an error occurred", func() {
 			storageClient := clientfakes.FakeStorageClient{}
-			storageClient.ExistsReturns(blob.ExistenceUnknown, errors.New("booom"))
+			storageClient.ExistsReturns(blob.ExistenceUnknown, errors.New("boom"))
 
 			azBlobstore, _ := client.New(&storageClient)
 			existsState, err := azBlobstore.Exists("blob")
@@ -98,6 +98,34 @@ var _ = Describe("Client", func() {
 
 			dest := storageClient.ExistsArgsForCall(0)
 			Expect(dest).To(Equal("blob"))
+		})
+	})
+
+	Context("signed url", func() {
+		It("returns a signed url for action 'get'", func() {
+			storageClient := clientfakes.FakeStorageClient{}
+			storageClient.SignedUrlReturns("https://the-signed-url", nil)
+
+			azBlobstore, _ := client.New(&storageClient)
+			url, err := azBlobstore.Sign("blob", "get", 100)
+			Expect(url == "https://the-signed-url").To(BeTrue())
+			Expect(err).ToNot(HaveOccurred())
+
+			dest, expiration := storageClient.SignedUrlArgsForCall(0)
+			Expect(dest).To(Equal("blob"))
+			Expect(int(expiration)).To(Equal(100))
+		})
+
+		It("fails on unknown action", func() {
+			storageClient := clientfakes.FakeStorageClient{}
+			storageClient.SignedUrlReturns("", errors.New("boom"))
+
+			azBlobstore, _ := client.New(&storageClient)
+			url, err := azBlobstore.Sign("blob", "unknown", 100)
+			Expect(url).To(Equal(""))
+			Expect(err).To(HaveOccurred())
+
+			Expect(storageClient.SignedUrlCallCount()).To(Equal(0))
 		})
 	})
 

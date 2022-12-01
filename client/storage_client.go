@@ -3,11 +3,14 @@ package client
 import (
 	"context"
 	"fmt"
+	azBlob "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blob"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/sas"
 	"github.com/mvach/bosh-azure-storage-cli/blob"
 	"io"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blockblob"
@@ -33,6 +36,11 @@ type StorageClient interface {
 	Exists(
 		dest string,
 	) (blob.ExistenceState, error)
+
+	SignedUrl(
+		dest string,
+		expiration time.Duration,
+	) (string, error)
 }
 
 type DefaultStorageClient struct {
@@ -142,4 +150,25 @@ func (dsc DefaultStorageClient) Exists(
 	}
 
 	return blob.Existing, nil
+}
+
+func (dsc DefaultStorageClient) SignedUrl(
+	dest string,
+	expiration time.Duration,
+) (string, error) {
+
+	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, dest)
+
+	log.Println(fmt.Sprintf("Getting signed url for blob %s", blobURL))
+	client, err := azBlob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
+	if err != nil {
+		return "", err
+	}
+
+	url, err := client.GetSASURL(sas.BlobPermissions{Read: true, Write: true}, time.Now(), time.Now().Add(expiration))
+	if err != nil {
+		return "", err
+	}
+
+	return url, err
 }
