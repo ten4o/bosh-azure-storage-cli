@@ -45,7 +45,7 @@ func (client *AzBlobstore) Exists(dest string) (blob.ExistenceState, error) {
 func (client *AzBlobstore) Sign(dest string, action string, expiration time.Duration) (string, error) {
 	action = strings.ToUpper(action)
 	switch action {
-	case "GET":
+	case "GET", "PUT":
 		return client.storageClient.SignedUrl(dest, expiration)
 	default:
 		return "", fmt.Errorf("action not implemented: %s", action)

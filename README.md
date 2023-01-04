@@ -34,6 +34,15 @@ Given a JSON config file (`config.json`)...
 ./bosh-azure-storage-cli -c config.json exists <remote-blob>
 
 # Command: "sign"
-# Create a self-signed url for s blob in the blobstore.
+# Create a self-signed url for a blob in the blobstore.
 ./bosh-azure-storage-cli -c config.json sign <remote-blob> <get|put> <seconds-to-expiration>
+```
+
+### Using signed urls with curl
+``` bash
+# Downloading a blob:
+curl -X PUT -H "x-ms-blob-type: blockblob" -F ‘fileX=<path/to/file>’ <signed url>
+
+# Uploading a blob:
+curl -X GET <signed url>
 ```
