@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mvach/bosh-azure-storage-cli/blob"
 	"github.com/mvach/bosh-azure-storage-cli/client"
 	"github.com/mvach/bosh-azure-storage-cli/config"
 	"log"
@@ -59,9 +58,6 @@ func main() {
 		defer sourceFile.Close()
 
 		err = blobstoreClient.Put(sourceFile, dst)
-		if err != nil {
-			log.Fatalln(err)
-		}
 
 	case "get":
 		if len(nonFlagArgs) != 3 {
@@ -78,9 +74,6 @@ func main() {
 		defer dstFile.Close()
 
 		err = blobstoreClient.Get(src, dstFile)
-		if err != nil {
-			log.Fatalln(err)
-		}
 
 	case "delete":
 		if len(nonFlagArgs) != 2 {
@@ -88,23 +81,19 @@ func main() {
 		}
 
 		err = blobstoreClient.Delete(nonFlagArgs[1])
-		if err != nil {
-			log.Fatalln(err)
-		}
+
 
 	case "exists":
 		if len(nonFlagArgs) != 2 {
-			log.Fatalf("Existing method expected 2 arguments got %d\n", len(nonFlagArgs))
+			log.Fatalf("Exists method expected 2 arguments got %d\n", len(nonFlagArgs))
 		}
 
-		existsState, err := blobstoreClient.Exists(nonFlagArgs[1])
-		if err != nil {
-			log.Fatalln(err)
-		}
+		var exists bool
+		exists, err = blobstoreClient.Exists(nonFlagArgs[1])
 
 		// If the object exists the exit status is 0, otherwise it is 3
 		// We are using `3` since `1` and `2` have special meanings
-		if existsState == blob.NotExisting {
+		if err == nil && !exists {
 			os.Exit(3)
 		}
 
@@ -136,5 +125,9 @@ func main() {
 
 	default:
 		log.Fatalf("unknown command: '%s'\n", cmd)
+	}
+
+	if err != nil {
+		log.Fatalf("performing operation %s: %s\n", cmd, err)
 	}
 }

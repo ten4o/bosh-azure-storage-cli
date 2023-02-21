@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/mvach/bosh-azure-storage-cli/blob"
 	"os"
 	"strings"
 	"time"
@@ -18,26 +17,20 @@ func New(storageClient StorageClient) (AzBlobstore, error) {
 
 func (client *AzBlobstore) Put(source *os.File, dest string) error {
 
-	_, err := client.storageClient.Upload(source, dest)
-
-	return err
+	return client.storageClient.Upload(source, dest)
 }
 
 func (client *AzBlobstore) Get(source string, dest *os.File) error {
 
-	_, err := client.storageClient.Download(source, dest)
-
-	return err
+	return client.storageClient.Download(source, dest)
 }
 
 func (client *AzBlobstore) Delete(dest string) error {
 
-	_, err := client.storageClient.Delete(dest)
-
-	return err
+	return client.storageClient.Delete(dest)
 }
 
-func (client *AzBlobstore) Exists(dest string) (blob.ExistenceState, error) {
+func (client *AzBlobstore) Exists(dest string) (bool, error) {
 
 	return client.storageClient.Exists(dest)
 }

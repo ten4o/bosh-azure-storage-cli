@@ -46,3 +46,14 @@ curl -X PUT -H "x-ms-blob-type: blockblob" -F ‘fileX=<path/to/file>’ <signed
 # Uploading a blob:
 curl -X GET <signed url>
 ```
+
+## Running integration tests
+
+To run the integration tests:
+- Export the following variables into your environment:
+  ``` bash
+  export ACCOUNT_NAME=<your Azure accounnt name>
+  export ACCOUNT_KEY=<your Azure account key>
+  export CONTAINER_NAME=<the target container name>
+  ```
+- go test ./integration/...

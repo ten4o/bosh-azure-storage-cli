@@ -5,7 +5,6 @@ import (
 	"fmt"
 	azBlob "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blob"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/sas"
-	"github.com/mvach/bosh-azure-storage-cli/blob"
 	"io"
 	"log"
 	"os"
@@ -22,20 +21,20 @@ type StorageClient interface {
 	Upload(
 		source io.ReadSeekCloser,
 		dest string,
-	) (StorageUploadResponse, error)
+	) error
 
 	Download(
 		source string,
 		dest *os.File,
-	) (int64, error)
+	) error
 
 	Delete(
 		dest string,
-	) (StorageDeleteResponse, error)
+	) error
 
 	Exists(
 		dest string,
-	) (blob.ExistenceState, error)
+	) (bool, error)
 
 	SignedUrl(
 		dest string,
@@ -46,6 +45,7 @@ type StorageClient interface {
 type DefaultStorageClient struct {
 	credential *azblob.SharedKeyCredential
 	serviceURL string
+	storageConfig config.AZStorageConfig
 }
 
 func NewStorageClient(storageConfig config.AZStorageConfig) (StorageClient, error) {
@@ -56,100 +56,97 @@ func NewStorageClient(storageConfig config.AZStorageConfig) (StorageClient, erro
 
 	serviceURL := fmt.Sprintf("https://%s.blob.core.windows.net/%s", storageConfig.AccountName, storageConfig.ContainerName)
 
-	return DefaultStorageClient{credential: credential, serviceURL: serviceURL}, nil
+	return DefaultStorageClient{credential: credential, serviceURL: serviceURL, storageConfig: storageConfig}, nil
 }
 
 func (dsc DefaultStorageClient) Upload(
 	source io.ReadSeekCloser,
 	dest string,
-) (StorageUploadResponse, error) {
+) error {
 
 	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, dest)
 
 	log.Println(fmt.Sprintf("Uploading %s", blobURL))
 	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
 	if err != nil {
-		return StorageUploadResponse{}, err
+		return err
 	}
 
-	resp, err := client.Upload(context.Background(), source, nil)
+	_, err = client.Upload(context.Background(), source, nil)
+	if err != nil {
+		return fmt.Errorf("upload failure: %s", err.Error())
+	}
 
-	return StorageUploadResponse{
-		ClientRequestID:     resp.ClientRequestID,
-		ContentMD5:          resp.ContentMD5,
-		Date:                resp.Date,
-		ETag:                resp.ETag,
-		EncryptionKeySHA256: resp.EncryptionKeySHA256,
-		EncryptionScope:     resp.EncryptionScope,
-		IsServerEncrypted:   resp.IsServerEncrypted,
-		LastModified:        resp.LastModified,
-		RequestID:           resp.RequestID,
-		Version:             resp.Version,
-		VersionID:           resp.VersionID,
-	}, err
+	log.Println("Successfully uploaded file")
+	return nil
 }
 
 func (dsc DefaultStorageClient) Download(
 	source string,
 	dest *os.File,
-) (int64, error) {
+) error {
 
 	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, source)
 
 	log.Println(fmt.Sprintf("Downloading %s", blobURL))
 	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
 	if err != nil {
-		return -1, err
+		return err
 	}
 
-	resp, err := client.DownloadFile(context.Background(), dest, nil)
+	_, err = client.DownloadFile(context.Background(), dest, nil)
 
-	return resp, err
+	return err
 }
 
 func (dsc DefaultStorageClient) Delete(
 	dest string,
-) (StorageDeleteResponse, error) {
+) error {
 
 	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, dest)
 
 	log.Println(fmt.Sprintf("Deleting %s", blobURL))
 	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
 	if err != nil {
-		return StorageDeleteResponse{}, err
+		return err
 	}
 
-	resp, err := client.Delete(context.Background(), nil)
+	_, err = client.Delete(context.Background(), nil)
 
-	return StorageDeleteResponse{
-		ClientRequestID: resp.ClientRequestID,
-		Date:            resp.Date,
-		RequestID:       resp.RequestID,
-		Version:         resp.Version,
-	}, err
+	if err == nil {
+		return nil
+	}
+
+	if strings.Contains(err.Error(), "RESPONSE 404") {
+		return nil
+	}
+
+	return err
 }
 
 func (dsc DefaultStorageClient) Exists(
 	dest string,
-) (blob.ExistenceState, error) {
+) (bool, error) {
 
 	blobURL := fmt.Sprintf("%s/%s", dsc.serviceURL, dest)
 
 	log.Println(fmt.Sprintf("Checking if blob: %s exists", blobURL))
 	client, err := blockblob.NewClientWithSharedKeyCredential(blobURL, dsc.credential, nil)
 	if err != nil {
-		return blob.ExistenceUnknown, err
+		return false, err
 	}
 
 	_, err = client.BlobClient().GetProperties(context.Background(), nil)
-	if strings.Contains(err.Error(), "RESPONSE 404") {
-		return blob.NotExisting, nil
+	if err == nil {
+		log.Printf("File '%s' exists in bucket '%s'\n", dest, dsc.storageConfig.ContainerName)
+		return true, nil
 	}
-	if err != nil {
-		return blob.ExistenceUnknown, err
+	if strings.Contains(err.Error(), "RESPONSE 404") {
+		log.Printf("File '%s' does not exist in bucket '%s'\n", dest, dsc.storageConfig.ContainerName)
+		return false, nil
 	}
 
-	return blob.Existing, nil
+	return false, err
 }
 
 func (dsc DefaultStorageClient) SignedUrl(
