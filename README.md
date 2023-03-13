@@ -40,10 +40,10 @@ Given a JSON config file (`config.json`)...
 
 ### Using signed urls with curl
 ``` bash
-# Downloading a blob:
-curl -X PUT -H "x-ms-blob-type: blockblob" -F ‘fileX=<path/to/file>’ <signed url>
-
 # Uploading a blob:
+curl -X PUT -H "x-ms-blob-type: blockblob" -F 'fileX=<path/to/file>' <signed url>
+
+# Downloading a blob:
 curl -X GET <signed url>
 ```
 
