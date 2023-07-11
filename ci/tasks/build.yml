@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+    # TODO
+    # source: { repository: bosh/azure-storage-cli }
+  source: { repository: bosh/s3cli }
+inputs:
+- name: bosh-azure-storage-cli
+- name: version-semver
+outputs:
+- name: out
+run:
+  path: bosh-azure-storage-cli/ci/scripts/build.sh
+params:
+  GOOS: linux
