@@ -1,13 +1,4 @@
 ---
-resources:
-- name: bosh-azure-storage-cli
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/cloudfoundry/bosh-azure-storage-cli
-    branch: main
-    fetch_tags: true
-
 jobs:
 - name: unit-tests
   public: true
@@ -19,3 +10,99 @@ jobs:
           trigger: true
     - task: run-unit-tests
       file: bosh-azure-storage-cli/ci/tasks/run-unit-tests.yml
+
+- name: publish-and-tag
+  plan:
+  - in_parallel:
+    - get: bosh-azure-storage-cli
+      trigger: true
+      passed:
+      - unit-tests
+    - get: azure-storage-cli-docker-image
+    - put: version-semver
+      params:
+        bump: patch
+  - in_parallel:
+    - task: build-linux
+      image: azure-storage-cli-docker-image
+      file: bosh-azure-storage-cli/ci/tasks/build.yml
+      output_mapping: { out: out-linux }
+      params:
+        GOOS: linux
+    - task: build-windows
+      image: azure-storage-cli-docker-image
+      file: bosh-azure-storage-cli/ci/tasks/build.yml
+      output_mapping: { out: out-windows }
+      params:
+        GOOS: windows
+  - in_parallel:
+    - put: release-bucket-linux
+      params: { file: out-linux/azure-storage-cli-*-linux-amd64 }
+    - put: release-bucket-windows
+      params: { file: out-windows/azure-storage-cli-*-windows-amd64.exe }
+  - put: bosh-azure-storage-cli
+    params:
+      repository: bosh-azure-storage-cli
+      rebase: true
+      tag: version-semver/number
+      tag_prefix: v
+
+- name: build-azure-storage-cli-docker-image
+  plan:
+  - get: bosh-azure-storage-cli
+    trigger: true
+  - get: bosh-golang-release-image
+    trigger: true
+  - put: azure-storage-cli-docker-image
+    params:
+      build: "bosh-azure-storage-cli/ci/docker/boshcpi.azure-storage-cli"
+    get_params:
+      skip_download: true
+
+resources:
+- name: bosh-azure-storage-cli
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/bosh-azure-storage-cli.git
+    branch: main
+    private_key: ((github_deploy_key_bosh_azure_storage_cli.private_key))
+
+- name: version-semver
+  type: semver
+  source:
+    initial_version: 0.0.1
+    key: current-version
+    bucket: bosh-azure-storage-cli-artifacts
+    access_key_id: ((bosh_azure_storage_cli_pipeline.username))
+    secret_access_key: ((bosh_azure_storage_cli_pipeline.password))
+
+- name: release-bucket-linux
+  type: s3
+  source:
+    regexp: azure-storage-cli-(.*)-linux-amd64
+    bucket: bosh-azure-storage-cli-artifacts
+    access_key_id: ((bosh_azure_storage_cli_pipeline.username))
+    secret_access_key: ((bosh_azure_storage_cli_pipeline.password))
+
+- name: release-bucket-windows
+  type: s3
+  source:
+    regexp: azure-storage-cli-(.*)-windows-amd64\.exe
+    bucket: bosh-azure-storage-cli-artifacts
+    access_key_id: ((bosh_azure_storage_cli_pipeline.username))
+    secret_access_key: ((bosh_azure_storage_cli_pipeline.password))
+
+- name: bosh-golang-release-image
+  type: docker-image
+  source:
+    repository: bosh/golang-release
+    username: ((dockerhub_username))
+    password: ((dockerhub_password))
+
+- name: azure-storage-cli-docker-image
+  type: docker-image
+  source:
+    repository: bosh/azure-storage-cli
+    username: ((dockerhub_username))
+    password: ((dockerhub_password))
+
