@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/bosh-azure-storage-cli
 
-go 1.19
+go 1.20
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.0.0
