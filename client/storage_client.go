@@ -43,8 +43,8 @@ type StorageClient interface {
 }
 
 type DefaultStorageClient struct {
-	credential *azblob.SharedKeyCredential
-	serviceURL string
+	credential    *azblob.SharedKeyCredential
+	serviceURL    string
 	storageConfig config.AZStorageConfig
 }
 
@@ -162,7 +162,7 @@ func (dsc DefaultStorageClient) SignedUrl(
 		return "", err
 	}
 
-	url, err := client.GetSASURL(sas.BlobPermissions{Read: true, Create: true}, time.Now(), time.Now().Add(expiration))
+	url, err := client.GetSASURL(sas.BlobPermissions{Read: true, Create: true}, time.Now().Add(expiration), nil)
 	if err != nil {
 		return "", err
 	}

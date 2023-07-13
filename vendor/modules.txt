@@ -1,4 +1,4 @@
-# github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.4
+# github.com/Azure/azure-sdk-for-go/sdk/azcore v1.7.0
 ## explicit; go 1.18
 github.com/Azure/azure-sdk-for-go/sdk/azcore
 github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud
@@ -15,18 +15,22 @@ github.com/Azure/azure-sdk-for-go/sdk/azcore/policy
 github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime
 github.com/Azure/azure-sdk-for-go/sdk/azcore/streaming
 github.com/Azure/azure-sdk-for-go/sdk/azcore/to
-# github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.1
+github.com/Azure/azure-sdk-for-go/sdk/azcore/tracing
+# github.com/Azure/azure-sdk-for-go/sdk/internal v1.3.0
 ## explicit; go 1.18
 github.com/Azure/azure-sdk-for-go/sdk/internal/diag
 github.com/Azure/azure-sdk-for-go/sdk/internal/errorinfo
+github.com/Azure/azure-sdk-for-go/sdk/internal/exported
 github.com/Azure/azure-sdk-for-go/sdk/internal/log
+github.com/Azure/azure-sdk-for-go/sdk/internal/poller
 github.com/Azure/azure-sdk-for-go/sdk/internal/temporal
 github.com/Azure/azure-sdk-for-go/sdk/internal/uuid
-# github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.5.1
+# github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.0.0
 ## explicit; go 1.18
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/appendblob
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blob
+github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/bloberror
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blockblob
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/container
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/internal/base
@@ -36,11 +40,11 @@ github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/internal/shared
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/pageblob
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/sas
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/service
-# github.com/go-logr/logr v1.2.3
+# github.com/go-logr/logr v1.2.4
 ## explicit; go 1.16
 github.com/go-logr/logr
 github.com/go-logr/logr/funcr
-# github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0
+# github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572
 ## explicit; go 1.13
 github.com/go-task/slim-sprig
 # github.com/google/go-cmp v0.5.9
@@ -50,18 +54,18 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38
-## explicit; go 1.14
+# github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8
+## explicit; go 1.19
 github.com/google/pprof/profile
 # github.com/kr/pretty v0.3.1
 ## explicit; go 1.12
-# github.com/maxbrunsfeld/counterfeiter/v6 v6.5.0
+# github.com/maxbrunsfeld/counterfeiter/v6 v6.6.2
 ## explicit; go 1.17
 github.com/maxbrunsfeld/counterfeiter/v6
 github.com/maxbrunsfeld/counterfeiter/v6/arguments
 github.com/maxbrunsfeld/counterfeiter/v6/command
 github.com/maxbrunsfeld/counterfeiter/v6/generator
-# github.com/onsi/ginkgo/v2 v2.9.1
+# github.com/onsi/ginkgo/v2 v2.11.0
 ## explicit; go 1.18
 github.com/onsi/ginkgo/v2
 github.com/onsi/ginkgo/v2/config
@@ -83,7 +87,7 @@ github.com/onsi/ginkgo/v2/internal/parallel_support
 github.com/onsi/ginkgo/v2/internal/testingtproxy
 github.com/onsi/ginkgo/v2/reporters
 github.com/onsi/ginkgo/v2/types
-# github.com/onsi/gomega v1.27.3
+# github.com/onsi/gomega v1.27.8
 ## explicit; go 1.18
 github.com/onsi/gomega
 github.com/onsi/gomega/format
@@ -99,14 +103,14 @@ github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
 # github.com/stretchr/testify v1.8.1
 ## explicit; go 1.13
-# golang.org/x/crypto v0.4.0
+# golang.org/x/crypto v0.11.0
 ## explicit; go 1.17
-# golang.org/x/mod v0.9.0
+# golang.org/x/mod v0.12.0
 ## explicit; go 1.17
 golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.8.0
+# golang.org/x/net v0.12.0
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/html
@@ -114,11 +118,11 @@ golang.org/x/net/html/atom
 golang.org/x/net/html/charset
 golang.org/x/net/http/httpguts
 golang.org/x/net/idna
-# golang.org/x/sys v0.6.0
+# golang.org/x/sys v0.10.0
 ## explicit; go 1.17
 golang.org/x/sys/execabs
 golang.org/x/sys/unix
-# golang.org/x/text v0.8.0
+# golang.org/x/text v0.11.0
 ## explicit; go 1.17
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
@@ -140,20 +144,20 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.7.0
+# golang.org/x/tools v0.11.0
 ## explicit; go 1.18
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/ast/inspector
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/go/packages
-golang.org/x/tools/go/types/objectpath
 golang.org/x/tools/go/types/typeutil
 golang.org/x/tools/imports
 golang.org/x/tools/internal/event
 golang.org/x/tools/internal/event/core
 golang.org/x/tools/internal/event/keys
 golang.org/x/tools/internal/event/label
+golang.org/x/tools/internal/event/tag
 golang.org/x/tools/internal/fastwalk
 golang.org/x/tools/internal/gcimporter
 golang.org/x/tools/internal/gocommand
