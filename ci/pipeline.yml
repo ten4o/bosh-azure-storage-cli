@@ -59,6 +59,27 @@ jobs:
     get_params:
       skip_download: true
 
+- name: bump-deps
+  plan:
+    - in_parallel:
+        - get: bosh-azure-storage-cli
+        - get: golang-release
+        - get: weekly
+          trigger: true
+    - task: bump-deps
+      file: golang-release/ci/tasks/shared/bump-deps.yml
+      input_mapping:
+        input_repo: bosh-azure-storage-cli
+      output_mapping:
+        output_repo: bumped-bosh-azure-storage-cli
+    - task: unit-tests
+      file: bosh-azure-storage-cli/ci/tasks/run-unit-tests.yml
+      input_mapping:
+        bosh-azure-storage-cli: bumped-bosh-azure-storage-cli
+    - put: bosh-azure-storage-cli
+      params:
+        repository: bumped-bosh-azure-storage-cli
+        rebase: true
 resources:
 - name: bosh-azure-storage-cli
   type: git
@@ -66,6 +87,11 @@ resources:
     uri: git@github.com:cloudfoundry/bosh-azure-storage-cli.git
     branch: main
     private_key: ((github_deploy_key_bosh-azure-storage-cli.private_key))
+
+- name: golang-release
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/bosh-package-golang-release.git
 
 - name: version-semver
   type: semver
@@ -106,3 +132,9 @@ resources:
     username: ((dockerhub_username))
     password: ((dockerhub_password))
 
+- name: weekly
+  type: time
+  source:
+    start: 12:00
+    stop: 13:00
+    days: [ Saturday ]
