@@ -4,8 +4,7 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: golang
-    tag: 1.19.7-alpine
+    repository: bosh/azure-storage-cli
 
 inputs:
   - name: bosh-azure-storage-cli

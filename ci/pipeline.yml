@@ -65,7 +65,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/bosh-azure-storage-cli.git
     branch: main
-    private_key: ((github_deploy_key_bosh_azure_storage_cli.private_key))
+    private_key: ((github_deploy_key_bosh-azure-storage-cli.private_key))
 
 - name: version-semver
   type: semver
